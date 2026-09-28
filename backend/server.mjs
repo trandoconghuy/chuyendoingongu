@@ -5,14 +5,22 @@ const openaiApiKey = process.env.OPENAI_API_KEY;
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const proxyToken = process.env.AI_PROXY_TOKEN;
 const openaiModel = process.env.OPENAI_MODEL || "gpt-6-astra";
-const geminiModel = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-const provider = (process.env.AI_PROVIDER || "auto").toLowerCase();
+// Alias này để Gemini API tự ánh xạ sang bản Flash hiện hành.
+const geminiModel = process.env.GEMINI_MODEL || "gemini-flash-latest";
+// Mặc định chỉ dùng Gemini; OpenAI/auto phải được bật rõ ràng.
+const provider = (process.env.AI_PROVIDER || "gemini").toLowerCase();
 
 if (!proxyToken || (!openaiApiKey && !geminiApiKey)) {
   throw new Error("Thiếu AI_PROXY_TOKEN hoặc chưa cấu hình khóa OpenAI/Gemini");
 }
 if (!["auto", "openai", "gemini"].includes(provider)) {
   throw new Error("AI_PROVIDER chỉ nhận auto, openai hoặc gemini");
+}
+if (provider === "gemini" && !geminiApiKey) {
+  throw new Error("AI_PROVIDER=gemini yêu cầu GEMINI_API_KEY");
+}
+if (provider === "openai" && !openaiApiKey) {
+  throw new Error("AI_PROVIDER=openai yêu cầu OPENAI_API_KEY");
 }
 
 const instructions = `Bạn là bộ nhận diện ngôn ngữ cho đoạn chat Zalo.
